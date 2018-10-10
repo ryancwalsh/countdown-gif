@@ -94,7 +94,8 @@ class CountdownGif
         $draw = $this->font->getImagickDraw();
         for ($i = 0; $i <= $this->getRuntime(); $i++) {
             $frame = $this->generateFrame($draw, $posX, $posY, $this->getDiff() - $i);
-            $frame->setImageDelay(100);
+            $delay = ($i == $this->getRuntime()) ? 90000 : 100;
+            $frame->setImageDelay($delay);
             $gif->addImage($frame);
         }
         return $gif;
