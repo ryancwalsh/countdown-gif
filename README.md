@@ -17,7 +17,7 @@ Add the appropriate lines to your project's `composer.json`:
 Install the PHP extension, and update your Composer dependencies (see [hint](https://stackoverflow.com/a/13500676/470749)):
 
 ```
-sudo apt-get install php-imagick
+sudo apt-get update && sudo apt-get install -y imagemagick php-imagick && sudo service php7.2-fpm restart && sudo service nginx restart
 composer update
 ```
 
