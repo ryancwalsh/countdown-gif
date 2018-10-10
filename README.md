@@ -1,3 +1,27 @@
+## Installation
+
+Add the appropriate lines to your project's `composer.json`:
+
+```
+"repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/ryancwalsh/countdown-gif"
+        }
+    ],
+"require": {
+        "Astrotomic/countdown-gif": "dev-master",
+        }
+```
+
+Install the PHP extension, and update your Composer dependencies (see [hint](https://stackoverflow.com/a/13500676/470749)):
+
+```
+sudo apt-get install php-imagick
+composer update
+```
+
+
 ## Example
 
 ```php
