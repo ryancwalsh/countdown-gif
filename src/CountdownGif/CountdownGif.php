@@ -38,9 +38,9 @@ class CountdownGif {
     protected $formatter;
 
     /**
-     * @var Imagick
+     * @var string
      */
-    protected $background;
+    protected $bgColor;
 
     /**
      * @var Font
@@ -53,31 +53,29 @@ class CountdownGif {
      * @param DateTime $target
      * @param int $runtime
      * @param Formatter $formatter
-     * @param Imagick $background
+     * @param string $bgColor
      * @param Font $font
      * @param string $default
      */
-    public function __construct(DateTime $now, DateTime $target, $runtime, Formatter $formatter, Imagick $background, Font $font, $default = null) {
+    public function __construct(DateTime $now, DateTime $target, $runtime, Formatter $formatter, $bgColor, Font $font, $default = null) {
         $this->now = $now;
         $this->target = $target;
         $this->runtime = $runtime;
         $this->default = $default;
         $this->formatter = $formatter;
-        $this->background = $background;
+        $this->bgColor = $bgColor;
         $this->font = $font;
     }
 
     /**
-     * @param int $posX
-     * @param int $posY
      * @return Imagick
      */
-    public function generate($posX, $posY) {
+    public function generate() {
         $gif = new Imagick();
         $gif->setFormat('gif');
         $draw = $this->font->getImagickDraw();
         for ($i = 0; $i <= $this->getRuntime(); $i++) {
-            $frame = $this->generateFrame($draw, $posX, $posY, $this->getDiff() - $i);
+            $frame = $this->generateFrame($draw, $this->getDiff() - $i);
             $delay = ($i == $this->getRuntime()) ? 90000 : 100; //pauses for a long time on the final frame (e.g. to show a message such as "Expired")
             $frame->setImageDelay($delay);
             $gif->addImage($frame);
@@ -87,15 +85,13 @@ class CountdownGif {
 
     /**
      * @param ImagickDraw $draw
-     * @param int $posX
-     * @param int $posY
      * @param int $seconds
      * @return Imagick
      */
-    protected function generateFrame($draw, $posX, $posY, $seconds) {
+    protected function generateFrame($draw, $seconds) {
         $secondsPositive = max(0, $seconds);
         $key = $this->getKey($secondsPositive);
-        if (Cache::has($key)) {
+        if (Cache::has($key) && 'TODO' == false) {
             //Log::debug('found ' . $key);
             $frame = new Imagick();
             $frame->readImageBlob(Cache::get($key));
@@ -105,10 +101,17 @@ class CountdownGif {
         if (empty($text) || $secondsPositive > 0) {
             $text = $this->formatter->getFormatted($secondsPositive);
         }
-        $frame = clone $this->background;
+        $frame = new \Imagick();
+        $frame->setFormat('png');
         $dimensions = $frame->queryFontMetrics($draw, $text);
-        $posYAdjusted = $posY + $dimensions['textHeight'] * 0.65 / 2;
-        $frame->annotateImage($draw, $posX, $posYAdjusted, 0, $text);
+        //Log::debug(json_encode($dimensions));
+        $textWidth = $dimensions['textWidth'];
+        $textHeight = $dimensions['textHeight'];
+        $posX = $textWidth / 2;
+        $yHeight = intval($dimensions['boundingBox']['y2']) - intval($dimensions['boundingBox']['y1']);
+        $posY = max($textHeight, $yHeight);
+        $frame->newImage($textWidth, $posY, $this->bgColor);
+        $frame->annotateImage($draw, $posX, $posY, 0, $text);
         $this->cacheFrame($frame, $secondsPositive);
         return $frame;
     }
@@ -133,8 +136,6 @@ class CountdownGif {
      * @return string
      */
     protected function getKey($seconds) {
-        $colorBg = (clone $this->background);
-        $colorBg->resizeImage(1, 1, Imagick::FILTER_UNDEFINED, 1);
         $array = [
 //            'target' => [
 //                'timestamp' => $this->target->getTimestamp(),
@@ -146,9 +147,7 @@ class CountdownGif {
                 'pads' => $this->formatter->getPads(),
             ],
             'background' => [
-                'width' => $this->background->getImageWidth(),
-                'height' => $this->background->getImageHeight(),
-                'color' => $colorBg->getImagePixelColor(1, 1)->getColorAsString(),
+                'color' => $this->bgColor,
             ],
             'font' => [
                 'family' => $this->font->getFamily(),
