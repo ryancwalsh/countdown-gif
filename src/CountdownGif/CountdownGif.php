@@ -48,6 +48,18 @@ class CountdownGif {
     protected $font;
 
     /**
+     *
+     * @var int
+     */
+    protected $leftRightPadding = 5;
+
+    /**
+     *
+     * @var int
+     */
+    protected $topBottomPadding = 5;
+
+    /**
      * CountdownGif constructor.
      * @param DateTime $now
      * @param DateTime $target
@@ -91,7 +103,7 @@ class CountdownGif {
     protected function generateFrame($draw, $seconds) {
         $secondsPositive = max(0, $seconds);
         $key = $this->getKey($secondsPositive);
-        if (Cache::has($key) && 'TODO' == false) {
+        if (Cache::has($key)) {
             //Log::debug('found ' . $key);
             $frame = new Imagick();
             $frame->readImageBlob(Cache::get($key));
@@ -110,8 +122,8 @@ class CountdownGif {
         $posX = $textWidth / 2;
         $yHeight = intval($dimensions['boundingBox']['y2']) - intval($dimensions['boundingBox']['y1']);
         $posY = max($textHeight, $yHeight);
-        $frame->newImage($textWidth, $posY, $this->bgColor);
-        $frame->annotateImage($draw, $posX, $posY, 0, $text);
+        $frame->newImage($textWidth + ($this->leftRightPadding * 2), $posY + ($this->topBottomPadding * 2), $this->bgColor);
+        $frame->annotateImage($draw, $posX + $this->leftRightPadding, $posY + $this->topBottomPadding, 0, $text);
         $this->cacheFrame($frame, $secondsPositive);
         return $frame;
     }
@@ -146,6 +158,8 @@ class CountdownGif {
                 'format' => $this->formatter->getFormat(),
                 'pads' => $this->formatter->getPads(),
             ],
+            'topBottomPadding' => $this->topBottomPadding,
+            'leftRightPadding' => $this->leftRightPadding,
             'background' => [
                 'color' => $this->bgColor,
             ],
