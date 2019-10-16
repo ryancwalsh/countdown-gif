@@ -10,7 +10,7 @@ Add the appropriate lines to your project's `composer.json`:
         }
     ],
 "require": {
-        "astrotomic/countdown-gif": "dev-master",
+        "astrotomic/countdown-gif": "^1.1",
         }
 ```
 
