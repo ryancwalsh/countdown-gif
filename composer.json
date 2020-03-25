@@ -1,6 +1,6 @@
 {
     "name": "astrotomic/countdown-gif",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "Countdown-Gif generator",
     "keywords": ["gif", "countdown", "imagick"],
     "license": "MIT",
